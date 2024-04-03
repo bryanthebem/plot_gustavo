@@ -1,5 +1,3 @@
-# Salve este código em um arquivo chamado 'app.py'
-
 import pandas as pd
 import dash
 from dash import html, dcc
@@ -25,78 +23,87 @@ app.layout = html.Div([
     html.H1("Desempenho de Vendas - 2020"),
     
     # Gráfico: Total de Vendas por Mês
-    dcc.Graph(id='vendas-por-mes', figure=px.line(df, x='Data_Pedido', y='Valor_Total_Venda', 
-                                                   title='Total de Vendas por Mês')),
+    html.Div([
+        html.H2("Total de Vendas por Mês"),
+        dcc.Graph(id='vendas-por-mes', figure=px.line(df, x='Data_Pedido', y='Valor_Total_Venda', 
+                                                       title='Total de Vendas por Mês')),
+        html.Label('Filtrar por Mês:'),
+        dcc.Dropdown(
+            id='filtro-mes',
+            options=[{'label': mes, 'value': mes} for mes in df['Data_Pedido'].str.split('-', expand=True)[1].unique()],
+            multi=True,
+            value=df['Data_Pedido'].str.split('-', expand=True)[1].unique()
+        ),
+    ]),
     
     # Gráfico: Total de Vendas por Representante
-    dcc.Graph(id='vendas-por-representante', figure=px.bar(df, x='Nome_Representante', 
-                                                           y='Valor_Total_Venda', 
-                                                           title='Total de Vendas por Representante')),
+    html.Div([
+        html.H2("Total de Vendas por Representante"),
+        dcc.Graph(id='vendas-por-representante', figure=px.bar(df, x='Nome_Representante', 
+                                                               y='Valor_Total_Venda', 
+                                                               title='Total de Vendas por Representante')),
+        html.Label('Filtrar por Representante:'),
+        dcc.Dropdown(
+            id='filtro-representante',
+            options=[{'label': rep, 'value': rep} for rep in df['Nome_Representante'].unique()],
+            multi=True,
+            value=df['Nome_Representante'].unique()
+        ),
+    ]),
     
     # Tabela: Total de Vendas por Produto
-    html.H2("Total de Vendas por Produto"),
-    dcc.Graph(id='vendas-por-produto', figure=px.bar(df, x='Nome_Produto', 
-                                                     y='Quantidade_Vendida', 
-                                                     title='Total de Vendas por Produto')),
+    html.Div([
+        html.H2("Total de Vendas por Produto"),
+        dcc.Graph(id='vendas-por-produto', figure=px.bar(df, x='Nome_Produto', 
+                                                         y='Quantidade_Vendida', 
+                                                         title='Total de Vendas por Produto')),
+    ]),
     
     # Gráfico: Total de Vendas por Regional
-    html.H2("Total de Vendas por Regional"),
-    dcc.Graph(id='vendas-por-regional', figure=px.pie(vendas_por_regional, 
-                                                      values='Valor_Total_Venda', 
-                                                      names='Regional', 
-                                                      title='Total de Vendas por Regional')),
+    html.Div([
+        html.H2("Total de Vendas por Regional"),
+        dcc.Graph(id='vendas-por-regional', figure=px.pie(vendas_por_regional, 
+                                                          values='Valor_Total_Venda', 
+                                                          names='Regional', 
+                                                          title='Total de Vendas por Regional')),
+        html.Label('Filtrar por Regional:'),
+        dcc.Dropdown(
+            id='filtro-regional',
+            options=[{'label': reg, 'value': reg} for reg in df['Regional'].unique()],
+            multi=True,
+            value=df['Regional'].unique()
+        ),
+    ]),
     
     # Gráfico: Total de Vendas por Estado
-    dcc.Graph(id='vendas-por-estado', figure=px.bar(df, x='Estado_Cliente', 
-                                                    y='Valor_Total_Venda', 
-                                                    title='Total de Vendas por Estado')),
-    
-    # Dropdown: Filtro por Mês
-    html.Label('Filtrar por Mês:'),
-    dcc.Dropdown(
-        id='filtro-mes',
-        options=[{'label': mes, 'value': mes} for mes in df['Data_Pedido'].str.split('-', expand=True)[1].unique()],
-        multi=True,
-        value=df['Data_Pedido'].str.split('-', expand=True)[1].unique()
-    ),
-    
-    # Dropdown: Filtro por Representante
-    html.Label('Filtrar por Representante:'),
-    dcc.Dropdown(
-        id='filtro-representante',
-        options=[{'label': rep, 'value': rep} for rep in df['Nome_Representante'].unique()],
-        multi=True,
-        value=df['Nome_Representante'].unique()
-    ),
-    
-    # Dropdown: Filtro por Regional
-    html.Label('Filtrar por Regional:'),
-    dcc.Dropdown(
-        id='filtro-regional',
-        options=[{'label': reg, 'value': reg} for reg in df['Regional'].unique()],
-        multi=True,
-        value=df['Regional'].unique()
-    ),
-    
-    # Dropdown: Filtro por Estado
-    html.Label('Filtrar por Estado:'),
-    dcc.Dropdown(
-        id='filtro-estado',
-        options=[{'label': estado, 'value': estado} for estado in df['Estado_Cliente'].unique()],
-        multi=False,
-        value=None
-    ),
+    html.Div([
+        html.H2("Total de Vendas por Estado"),
+        dcc.Graph(id='vendas-por-estado', figure=px.bar(df, x='Estado_Cliente', 
+                                                        y='Valor_Total_Venda', 
+                                                        title='Total de Vendas por Estado')),
+        html.Label('Filtrar por Estado:'),
+        dcc.Dropdown(
+            id='filtro-estado',
+            options=[{'label': estado, 'value': estado} for estado in df['Estado_Cliente'].unique()],
+            multi=False,
+            value=None
+        ),
+    ]),
     
     # Dropdown: Filtro por Cidade do Cliente
-    html.Label('Filtrar por Cidade do Cliente:'),
-    dcc.Dropdown(
-        id='filtro-cidade',
-        multi=False,
-        value=None
-    ),
+    html.Div([
+        html.Label('Filtrar por Cidade do Cliente:'),
+        dcc.Dropdown(
+            id='filtro-cidade',
+            multi=False,
+            value=None
+        ),
+    ]),
     
     # Gráfico: Total de Vendas por Estado e Cidade do Cliente
-    dcc.Graph(id='vendas-por-estado-e-cidade'),
+    html.Div([
+        dcc.Graph(id='vendas-por-estado-e-cidade'),
+    ]),
 ])
 
 # Callback para atualizar o gráfico de vendas por mês
