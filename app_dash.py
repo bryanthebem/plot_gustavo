@@ -1,7 +1,7 @@
-#pergunta 1
 import pandas as pd
 import dash
-from dash import html, dcc
+from dash import html, dcc, callback_context
+from dash.dependencies import Input, Output
 import plotly.express as px
 import re
 
@@ -22,6 +22,7 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
     html.H1("Desempenho de Vendas - 2020"),
     
+    # Pergunta 1
     # Gráfico: Total de Vendas por Mês
     dcc.Graph(id='vendas-por-mes', figure=px.line(df, x='Data_Pedido', y='Valor_Total_Venda', 
                                                    title='Total de Vendas por Mês')),
@@ -39,7 +40,7 @@ app.layout = html.Div([
     
     # Gráfico: Total de Vendas por Regional
     html.H2("Total de Vendas por Regional"),
-    dcc.Graph(id='vendas-por-regional', figure=px.pie(vendas_por_regional, 
+    dcc.Graph(id='vendas-por-regional-p1', figure=px.pie(vendas_por_regional, 
                                                       values='Valor_Total_Venda', 
                                                       names='Regional', 
                                                       title='Total de Vendas por Regional')),
@@ -48,39 +49,8 @@ app.layout = html.Div([
     dcc.Graph(id='vendas-por-estado', figure=px.bar(df, x='Estado_Cliente', 
                                                     y='Valor_Total_Venda', 
                                                     title='Total de Vendas por Estado')),
-])
-
-# Executar o aplicativo
-if __name__ == '__main__':
-    app.run_server(debug=True)
-
-
-# Pergunta 2
-import pandas as pd
-import dash
-from dash import html, dcc, callback_context
-from dash.dependencies import Input, Output
-import plotly.express as px
-import re
-
-# Carregar os dados
-df = pd.read_csv('1 - Base de Dados.csv')
-
-# Remover caracteres não numéricos e converter para float
-df['Valor_Produto'] = df['Valor_Produto'].apply(lambda x: float(re.sub(r'[^\d.]', '', x)))
-df['Valor_Total_Venda'] = df['Valor_Total_Venda'].apply(lambda x: float(re.sub(r'[^\d.]', '', x)))
-
-# Calcular Total de Vendas por Regional
-vendas_por_regional = df.groupby('Regional')['Valor_Total_Venda'].sum().reset_index()
-
-# Inicializar o aplicativo Dash
-app = dash.Dash(__name__)
-server = app.server
-
-# Layout do aplicativo
-app.layout = html.Div([
-    html.H1("Desempenho de Vendas - 2020"),
     
+    # Pergunta 2
     # Dropdown: Filtro por Mês
     html.Label('Filtrar por Mês:'),
     dcc.Dropdown(
@@ -90,9 +60,6 @@ app.layout = html.Div([
         value=df['Data_Pedido'].str.split('-', expand=True)[1].unique()
     ),
     
-    # Gráfico: Total de Vendas por Mês
-    dcc.Graph(id='vendas-por-mes'),
-    
     # Dropdown: Filtro por Representante
     html.Label('Filtrar por Representante:'),
     dcc.Dropdown(
@@ -101,9 +68,6 @@ app.layout = html.Div([
         multi=True,
         value=df['Nome_Representante'].unique()
     ),
-    
-    # Gráfico: Total de Vendas por Representante
-    dcc.Graph(id='vendas-por-representante'),
     
     # Dropdown: Filtro por Regional
     html.Label('Filtrar por Regional:'),
@@ -115,7 +79,28 @@ app.layout = html.Div([
     ),
     
     # Gráfico: Total de Vendas por Regional
-    dcc.Graph(id='vendas-por-regional'),
+    dcc.Graph(id='vendas-por-regional-p2'),
+    
+    # Pergunta 3
+    # Dropdown: Filtro por Estado
+    html.Label('Filtrar por Estado:'),
+    dcc.Dropdown(
+        id='filtro-estado',
+        options=[{'label': estado, 'value': estado} for estado in df['Estado_Cliente'].unique()],
+        multi=False,
+        value=None
+    ),
+    
+    # Dropdown: Filtro por Cidade do Cliente
+    html.Label('Filtrar por Cidade do Cliente:'),
+    dcc.Dropdown(
+        id='filtro-cidade',
+        multi=False,
+        value=None
+    ),
+    
+    # Gráfico: Total de Vendas por Estado e Cidade do Cliente
+    dcc.Graph(id='vendas-por-estado-e-cidade'),
 ])
 
 # Callback para atualizar o gráfico de vendas por mês
@@ -138,9 +123,9 @@ def update_graph_representante(selected_representante):
     fig = px.bar(filtered_df, x='Nome_Representante', y='Valor_Total_Venda', title='Total de Vendas por Representante')
     return fig
 
-# Callback para atualizar o gráfico de vendas por regional
+# Callback para atualizar o gráfico de vendas por regional (Pergunta 2)
 @app.callback(
-    Output('vendas-por-regional', 'figure'),
+    Output('vendas-por-regional-p2', 'figure'),
     [Input('filtro-regional', 'value')]
 )
 def update_graph_regional(selected_regional):
@@ -149,41 +134,7 @@ def update_graph_regional(selected_regional):
     fig = px.pie(vendas_por_regional, values='Valor_Total_Venda', names='Regional', title='Total de Vendas por Regional')
     return fig
 
-# Executar o aplicativo
-if __name__ == '__main__':
-    app.run_server(debug=True)
-
-#Pergunta 3
-
-# Inicializar o aplicativo Dash
-app = dash.Dash(__name__)
-
-# Layout do aplicativo
-app.layout = html.Div([
-    html.H1("Desempenho de Vendas - 2020"),
-    
-    # Dropdown: Filtro por Estado
-    html.Label('Filtrar por Estado:'),
-    dcc.Dropdown(
-        id='filtro-estado',
-        options=[{'label': estado, 'value': estado} for estado in df['Estado_Cliente'].unique()],
-        multi=False,
-        value=None
-    ),
-    
-    # Dropdown: Filtro por Cidade do Cliente
-    html.Label('Filtrar por Cidade do Cliente:'),
-    dcc.Dropdown(
-        id='filtro-cidade',
-        multi=False,
-        value=None
-    ),
-    
-    # Gráfico: Total de Vendas por Estado e Cidade do Cliente
-    dcc.Graph(id='vendas-por-estado-e-cidade'),
-])
-
-# Callback para atualizar as opções do filtro de cidade com base no estado selecionado
+# Callback para atualizar as opções do filtro de cidade com base no estado selecionado (Pergunta 3)
 @app.callback(
     Output('filtro-cidade', 'options'),
     [Input('filtro-estado', 'value')]
@@ -196,7 +147,7 @@ def update_cidades_options(selected_estado):
     else:
         return []
 
-# Callback para atualizar o gráfico de vendas por estado e cidade do cliente
+# Callback para atualizar o gráfico de vendas por estado e cidade do cliente (Pergunta 3)
 @app.callback(
     Output('vendas-por-estado-e-cidade', 'figure'),
     [Input('filtro-estado', 'value'),
