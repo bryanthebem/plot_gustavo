@@ -1,7 +1,8 @@
+# Salve este código em um arquivo chamado 'app.py'
+
 import pandas as pd
 import dash
-from dash import html, dcc, callback_context
-from dash.dependencies import Input, Output
+from dash import html, dcc
 import plotly.express as px
 import re
 
@@ -17,12 +18,12 @@ vendas_por_regional = df.groupby('Regional')['Valor_Total_Venda'].sum().reset_in
 
 # Inicializar o aplicativo Dash
 app = dash.Dash(__name__)
+server = app.server
 
 # Layout do aplicativo
 app.layout = html.Div([
     html.H1("Desempenho de Vendas - 2020"),
     
-    # Pergunta 1
     # Gráfico: Total de Vendas por Mês
     dcc.Graph(id='vendas-por-mes', figure=px.line(df, x='Data_Pedido', y='Valor_Total_Venda', 
                                                    title='Total de Vendas por Mês')),
@@ -40,7 +41,7 @@ app.layout = html.Div([
     
     # Gráfico: Total de Vendas por Regional
     html.H2("Total de Vendas por Regional"),
-    dcc.Graph(id='vendas-por-regional-p1', figure=px.pie(vendas_por_regional, 
+    dcc.Graph(id='vendas-por-regional', figure=px.pie(vendas_por_regional, 
                                                       values='Valor_Total_Venda', 
                                                       names='Regional', 
                                                       title='Total de Vendas por Regional')),
@@ -50,7 +51,6 @@ app.layout = html.Div([
                                                     y='Valor_Total_Venda', 
                                                     title='Total de Vendas por Estado')),
     
-    # Pergunta 2
     # Dropdown: Filtro por Mês
     html.Label('Filtrar por Mês:'),
     dcc.Dropdown(
@@ -78,10 +78,6 @@ app.layout = html.Div([
         value=df['Regional'].unique()
     ),
     
-    # Gráfico: Total de Vendas por Regional
-    dcc.Graph(id='vendas-por-regional-p2'),
-    
-    # Pergunta 3
     # Dropdown: Filtro por Estado
     html.Label('Filtrar por Estado:'),
     dcc.Dropdown(
@@ -105,8 +101,8 @@ app.layout = html.Div([
 
 # Callback para atualizar o gráfico de vendas por mês
 @app.callback(
-    Output('vendas-por-mes', 'figure'),
-    [Input('filtro-mes', 'value')]
+    dash.dependencies.Output('vendas-por-mes', 'figure'),
+    [dash.dependencies.Input('filtro-mes', 'value')]
 )
 def update_graph_mes(selected_mes):
     filtered_df = df[df['Data_Pedido'].str.split('-', expand=True)[1].isin(selected_mes)]
@@ -115,18 +111,18 @@ def update_graph_mes(selected_mes):
 
 # Callback para atualizar o gráfico de vendas por representante
 @app.callback(
-    Output('vendas-por-representante', 'figure'),
-    [Input('filtro-representante', 'value')]
+    dash.dependencies.Output('vendas-por-representante', 'figure'),
+    [dash.dependencies.Input('filtro-representante', 'value')]
 )
 def update_graph_representante(selected_representante):
     filtered_df = df[df['Nome_Representante'].isin(selected_representante)]
     fig = px.bar(filtered_df, x='Nome_Representante', y='Valor_Total_Venda', title='Total de Vendas por Representante')
     return fig
 
-# Callback para atualizar o gráfico de vendas por regional (Pergunta 2)
+# Callback para atualizar o gráfico de vendas por regional
 @app.callback(
-    Output('vendas-por-regional-p2', 'figure'),
-    [Input('filtro-regional', 'value')]
+    dash.dependencies.Output('vendas-por-regional', 'figure'),
+    [dash.dependencies.Input('filtro-regional', 'value')]
 )
 def update_graph_regional(selected_regional):
     filtered_df = df[df['Regional'].isin(selected_regional)]
@@ -134,10 +130,10 @@ def update_graph_regional(selected_regional):
     fig = px.pie(vendas_por_regional, values='Valor_Total_Venda', names='Regional', title='Total de Vendas por Regional')
     return fig
 
-# Callback para atualizar as opções do filtro de cidade com base no estado selecionado (Pergunta 3)
+# Callback para atualizar as opções do filtro de cidade com base no estado selecionado
 @app.callback(
-    Output('filtro-cidade', 'options'),
-    [Input('filtro-estado', 'value')]
+    dash.dependencies.Output('filtro-cidade', 'options'),
+    [dash.dependencies.Input('filtro-estado', 'value')]
 )
 def update_cidades_options(selected_estado):
     if selected_estado is not None:
@@ -147,11 +143,11 @@ def update_cidades_options(selected_estado):
     else:
         return []
 
-# Callback para atualizar o gráfico de vendas por estado e cidade do cliente (Pergunta 3)
+# Callback para atualizar o gráfico de vendas por estado e cidade do cliente
 @app.callback(
-    Output('vendas-por-estado-e-cidade', 'figure'),
-    [Input('filtro-estado', 'value'),
-     Input('filtro-cidade', 'value')]
+    dash.dependencies.Output('vendas-por-estado-e-cidade', 'figure'),
+    [dash.dependencies.Input('filtro-estado', 'value'),
+     dash.dependencies.Input('filtro-cidade', 'value')]
 )
 def update_graph_estado_cidade(selected_estado, selected_cidade):
     filtered_df = df
