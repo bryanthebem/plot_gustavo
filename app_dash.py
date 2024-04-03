@@ -75,6 +75,7 @@ vendas_por_regional = df.groupby('Regional')['Valor_Total_Venda'].sum().reset_in
 
 # Inicializar o aplicativo Dash
 app = dash.Dash(__name__)
+server = app.server
 
 # Layout do aplicativo
 app.layout = html.Div([
