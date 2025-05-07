@@ -164,4 +164,5 @@ def update_pie_chart(country):
 
 # Executar o aplicativo
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run_server(debug=True)
+
