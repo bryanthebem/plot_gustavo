@@ -6,7 +6,7 @@ from dash import html
 from dash.dependencies import Input, Output
 
 # Carregar o arquivo CSV
-df = pd.read_csv('Summer_olympic_Medals.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Summer_olympic_Medals.csv')
 # Substituir 'United States' por 'Estados Unidos da América' na coluna 'Country_Name'
 df['Country_Name'] = df['Country_Name'].replace('United States', 'Estados Unidos da América')
 
