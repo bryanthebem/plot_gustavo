@@ -8,9 +8,6 @@ from dash.dependencies import Input, Output
 # Carregar o arquivo CSV
 df = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Summer_olympic_Medals.csv')
 
-# Substituir 'United States' por 'Estados Unidos da América' na coluna 'Country_Name'
-df['Country_Name'] = df['Country_Name'].replace('United States', 'Estados Unidos da América')
-
 # Filtrar os dados entre 1992 e 2020
 df = df[(df['Year'] >= 1992) & (df['Year'] <= 2020)].copy() # Usar .copy() para evitar SettingWithCopyWarning
 
@@ -44,9 +41,6 @@ def create_map_fig(medal_type='Todas'):
 
 
 def create_area_fig(medal_type='Todas'):
-    # Selecionar os top 10 países com base no TOTAL de medalhas no período,
-    # independentemente do filtro de tipo de medalha atual. Isso mantém a
-    # consistência da seleção dos países ao mudar o filtro.
     top_countries = df_yearly_country.groupby('Country_Name')['Total_Medals'].sum().nlargest(10).index
 
     # Filtrar os dados anuais apenas para os top 10 países
@@ -114,7 +108,7 @@ def create_pie_chart(country):
 
 # Criar um aplicativo Dash
 app = dash.Dash(__name__)
-server = app.server # Necessário para deploy
+server = app.server 
 
 # Layout do aplicativo
 app.layout = html.Div([
@@ -176,7 +170,7 @@ app.layout = html.Div([
 
 
 # Callbacks para atualizar os gráficos
-# Callback para o Mapa (depende apenas do filtro de tipo de medalha)
+# Callback para o Mapa 
 @app.callback(
     Output('map', 'figure'),
     [Input('medal-type-dropdown', 'value')]
@@ -184,27 +178,25 @@ app.layout = html.Div([
 def update_map(medal_type):
     return create_map_fig(medal_type)
 
-# Callback para o Gráfico de Área (depende apenas do filtro de tipo de medalha)
+# Callback para o Gráfico de Área
 @app.callback(
     Output('area-chart', 'figure'),
     [Input('medal-type-dropdown', 'value')]
 )
 def update_area_chart(medal_type):
-    # A função create_area_fig já lida com o tipo de medalha
     return create_area_fig(medal_type)
 
-# Callback para o Gráfico de Barras (depende do filtro de ano e do filtro de tipo de medalha)
+# Callback para o Gráfico de Barras 
 @app.callback(
     Output('bar-chart', 'figure'),
     [Input('year-dropdown', 'value'),
      Input('medal-type-dropdown', 'value')] # Adicionado Input para o filtro de tipo de medalha
 )
 def update_bar_chart(year, medal_type):
-    # A função create_bar_fig já lida com o ano e o tipo de medalha
     return create_bar_fig(year, medal_type)
 
 
-# Callback para o Gráfico de Pizza (depende apenas do filtro de país)
+# Callback para o Gráfico de Pizza 
 @app.callback(
     Output('pie-chart', 'figure'),
     [Input('country-dropdown', 'value')]
