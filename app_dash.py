@@ -1,38 +1,36 @@
 import pandas as pd
 import plotly.express as px
 import dash
-from dash import dcc, html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output
 
 # Carregar o arquivo CSV
 df = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Summer_olympic_Medals.csv')
+
 # Substituir 'United States' por 'Estados Unidos da América' na coluna 'Country_Name'
 df['Country_Name'] = df['Country_Name'].replace('United States', 'Estados Unidos da América')
 
 # Filtrar os dados entre 1992 e 2020
 df = df[(df['Year'] >= 1992) & (df['Year'] <= 2020)].copy() # Usar .copy() para evitar SettingWithCopyWarning
 
-# Calcular o total de medalhas para cada país
-df['Total_Medals'] = df['Gold'] + df['Silver'] + df['Bronze']
-
-# Preparar opções para o dropdown de Ano Olímpico (com país sede)
-year_host_map = df.groupby('Year')['Host_country'].first().reset_index()
-year_host_map.sort_values('Year', ascending=False, inplace=True)
-year_options_for_dropdown = [{'label': f"{row['Year']} ({row['Host_country']})", 'value': row['Year']}
-                             for index, row in year_host_map.iterrows()]
-default_year = year_host_map['Year'].max() if not year_host_map.empty else None
+# Calcular o total de medalhas para cada país por ano
+# Agrupar por país e ano antes de calcular o total para ter dados anuais
+df_yearly_country = df.groupby(['Country_Name', 'Year'])[['Gold', 'Silver', 'Bronze']].sum().reset_index()
+df_yearly_country['Total_Medals'] = df_yearly_country['Gold'] + df_yearly_country['Silver'] + df_yearly_country['Bronze']
 
 
 # Funções para gerar os gráficos
 def create_map_fig(medal_type='Todas'):
-    if medal_type != 'Todas':
-        df_country_medals = df.groupby('Country_Name')[medal_type].sum().reset_index()
-        color_col = medal_type
-        title_text = f'Total de Medalhas de {medal_type.lower()} por País (1992-2020)'
-    else:
-        df_country_medals = df.groupby('Country_Name')['Total_Medals'].sum().reset_index()
+    # Agrupar dados por país, somando as medalhas para o período completo
+    if medal_type == 'Todas':
+        df_country_medals = df_yearly_country.groupby('Country_Name')['Total_Medals'].sum().reset_index()
         color_col = 'Total_Medals'
-        title_text = 'Total Geral de Medalhas por País (1992-2020)'
+        title_medal_text = 'Total de Medalhas'
+    else:
+        df_country_medals = df_yearly_country.groupby('Country_Name')[medal_type].sum().reset_index()
+        color_col = medal_type
+        title_medal_text = medal_type # Será Gold, Silver ou Bronze
 
     map_fig = px.choropleth(df_country_medals,
                             locations='Country_Name',
@@ -40,159 +38,145 @@ def create_map_fig(medal_type='Todas'):
                             color=color_col,
                             hover_name='Country_Name',
                             color_continuous_scale=px.colors.sequential.YlOrRd,
-                            title=title_text,
-                            labels={color_col: 'Medalhas'})
-    map_fig.update_layout(title_x=0.5)
+                            title=f'{title_medal_text} de 1992 a 2020')
+    map_fig.update_layout(title_x=0.5) # Centralizar o título
     return map_fig
 
 
 def create_area_fig(medal_type='Todas'):
-    y_column = medal_type if medal_type != 'Todas' else 'Total_Medals'
-    title_medal_desc = medal_type.lower() if medal_type != 'Todas' else 'total de'
+    # Selecionar os top 10 países com base no TOTAL de medalhas no período,
+    # independentemente do filtro de tipo de medalha atual. Isso mantém a
+    # consistência da seleção dos países ao mudar o filtro.
+    top_countries = df_yearly_country.groupby('Country_Name')['Total_Medals'].sum().nlargest(10).index
 
-    # Determinar os top 10 países com base no tipo de medalha selecionado
-    top_countries_names = df.groupby('Country_Name')[y_column].sum().nlargest(10).index
-    df_filtered_top_countries = df[df['Country_Name'].isin(top_countries_names)]
+    # Filtrar os dados anuais apenas para os top 10 países
+    df_top_10_countries_yearly = df_yearly_country[df_yearly_country['Country_Name'].isin(top_countries)]
 
-    # Agrupar dados para o gráfico de área
-    df_plot = df_filtered_top_countries.groupby(['Country_Name', 'Year'])[y_column].sum().reset_index()
+    # Definir qual coluna usar para o eixo Y e o título
+    y_col = 'Total_Medals' if medal_type == 'Todas' else medal_type
+    title_medal_text = 'Total de Medalhas' if medal_type == 'Todas' else medal_type # Será Gold, Silver ou Bronze
 
-    area_fig = px.area(df_plot,
+    area_fig = px.area(df_top_10_countries_yearly,
                        x="Year",
-                       y=y_column,
+                       y=y_col,
                        color="Country_Name",
-                       title=f'Top 10 Países por {title_medal_desc} Medalhas (1992-2020)',
-                       labels={y_column: f'{title_medal_desc.capitalize()} Medalhas', 'Year': 'Ano'})
-    area_fig.update_layout(title_x=0.5)
+                       title=f'Top 10 Países por {title_medal_text} de 1992 a 2020')
+    area_fig.update_layout(title_x=0.5) # Centralizar o título
     return area_fig
 
 
 def create_bar_fig(year=None, medal_type='Todas'):
-    temp_df = df.copy()
-    fig_title_year_part = "(1992-2020)"
-    host_country_name = ""
+    # Filtrar dados pelo ano selecionado, se houver.
+    filtered_df = df_yearly_country[df_yearly_country['Year'] == year] if year else df_yearly_country
 
-    if year:
-        temp_df = temp_df[temp_df['Year'] == year]
-        host_info = year_host_map[year_host_map['Year'] == year]
-        if not host_info.empty:
-            host_country_name = host_info['Host_country'].iloc[0]
-            fig_title_year_part = f"em {year} ({host_country_name})"
+    # Definir qual coluna usar para o eixo Y e para a seleção dos top 10
+    y_col = 'Total_Medals' if medal_type == 'Todas' else medal_type
+    title_medal_text = 'Total de Medalhas' if medal_type == 'Todas' else medal_type # Será Gold, Silver ou Bronze
 
-    y_column = medal_type
-    title_medal_desc = medal_type.lower()
-    bar_color = None
+    # Agrupar por país e somar as medalhas (do tipo selecionado ou total) para o período/ano filtrado
+    df_country_medals = filtered_df.groupby('Country_Name')[y_col].sum().reset_index()
 
-    if medal_type == 'Todas':
-        y_column = 'Total_Medals'
-        title_medal_desc = 'total de'
-    elif medal_type == 'Gold':
-        bar_color = 'gold'
-    elif medal_type == 'Silver':
-        bar_color = 'silver'
-    elif medal_type == 'Bronze':
-        bar_color = '#CD7F32'  # Cor para bronze
+    # Selecionar os top 10 países com base na coluna definida (y_col)
+    df_top_countries = df_country_medals.nlargest(10, y_col)
 
-    medal_summary_by_country = temp_df.groupby('Country_Name')[['Gold', 'Silver', 'Bronze', 'Total_Medals']].sum()
-    top_10_data = medal_summary_by_country.nlargest(10, y_column).reset_index()
+    # Definir o título do gráfico
+    title_year_text = f"em {year}" if year else "de 1992 a 2020"
+    title_text = f'Top 10 Países com Mais {title_medal_text} {title_year_text}'
 
-    bar_fig = px.bar(top_10_data,
+    # Definir a cor da barra (opcionalmente, pode ser baseado no tipo de medalha)
+    bar_color = 'gold' if medal_type == 'Gold' else ('silver' if medal_type == 'Silver' else ('#cd7f32' if medal_type == 'Bronze' else px.colors.qualitative.Plotly[0])) # #cd7f32 é um tom de bronze
+
+    bar_fig = px.bar(df_top_countries,
                      x='Country_Name',
-                     y=y_column,
-                     title=f'Top 10 Países por {title_medal_desc} Medalhas {fig_title_year_part}',
-                     labels={y_column: f'{title_medal_desc.capitalize()} Medalhas', 'Country_Name': 'País'})
-
-    if bar_color:
-        bar_fig.update_traces(marker_color=bar_color)
-    
-    bar_fig.update_layout(title_x=0.5)
+                     y=y_col,
+                     color_discrete_sequence=[bar_color],
+                     title=title_text)
+    bar_fig.update_layout(title_x=0.5) # Centralizar o título
     return bar_fig
 
 
 def create_pie_chart(country):
-    filtered_df = df[df['Country_Name'] == country]
-    # Somar medalhas ao longo de todos os anos para o país selecionado
+    # Filtrar dados para o país selecionado para o período completo
+    filtered_df = df_yearly_country[df_yearly_country['Country_Name'] == country]
+    # Somar as medalhas por tipo para o país selecionado
     medal_counts = filtered_df[['Gold', 'Silver', 'Bronze']].sum()
-    
-    # Lidar com o caso de não haver medalhas ou país não encontrado (embora o dropdown deva prevenir isso)
-    if medal_counts.sum() == 0:
-        return px.pie(title=f'Nenhuma medalha encontrada para {country} (1992-2020)').update_layout(title_x=0.5)
 
     fig = px.pie(
         values=medal_counts.values,
         names=medal_counts.index,
         title=f'Distribuição de Medalhas para {country} (1992-2020)',
         hole=0.3,
-        color_discrete_map={'Gold': 'gold', 'Silver': 'silver', 'Bronze': '#CD7F32'}
+        labels={'Gold': 'Ouro', 'Silver': 'Prata', 'Bronze': 'Bronze'}
     )
-    fig.update_layout(title_x=0.5)
+    fig.update_layout(title_x=0.5) # Centralizar o título
     return fig
 
 
 # Criar um aplicativo Dash
 app = dash.Dash(__name__)
-server = app.server # Para deploy no Gunicorn/Heroku etc.
+server = app.server # Necessário para deploy
 
-app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif'}, children=[
-    html.H1("Dashboard de Medalhas Olímpicas (1992-2020)", style={'textAlign': 'center', 'marginBottom': '20px'}),
+# Layout do aplicativo
+app.layout = html.Div([
+    html.H1("Dashboard de Medalhas Olímpicas de Verão (1992-2020)", style={'textAlign': 'center'}),
 
+    # Gráfico de Mapa
+    dcc.Graph(figure=create_map_fig(), id='map', style={'height': '60vh', 'width': '100%', 'marginBottom': '20px'}), # Aumentei a altura e adicionei margem
+
+    # Container para Gráficos de Área e Barras (usando flexbox para alinhamento lado a lado)
     html.Div([
-        html.Label('Selecione o Tipo de Medalha para os gráficos principais:', style={'marginRight': '10px'}),
-        dcc.Dropdown(
-            id='medal-type-dropdown',
-            options=[
-                {'label': 'Todas', 'value': 'Todas'},
-                {'label': 'Ouro', 'value': 'Gold'},
-                {'label': 'Prata', 'value': 'Silver'},
-                {'label': 'Bronze', 'value': 'Bronze'}
-            ],
-            value='Todas',
-            clearable=False,
-            style={'width': '200px', 'display': 'inline-block'}
-        )
-    ], style={'textAlign': 'center', 'marginBottom': '30px'}),
+        dcc.Graph(figure=create_area_fig(), id='area-chart', style={'flex': 1, 'marginRight': '10px'}), # flex: 1 faz os gráficos ocuparem espaço igual
+        dcc.Graph(figure=create_bar_fig(), id='bar-chart', style={'flex': 1, 'marginLeft': '10px'})
+    ], style={'display': 'flex', 'marginBottom': '20px'}), # display: flex coloca os itens em linha
 
-    dcc.Graph(
-        id='map',
-        figure=create_map_fig(), # Figura inicial
-        style={'height': '60vh', 'width': '100%', 'marginBottom': '30px'}
-    ),
-
+    # Container para Filtros (usando flexbox para alinhamento lado a lado)
+    # Colocamos os filtros abaixo dos gráficos de área/barra, no mesmo nível para alinhá-los.
     html.Div([
+        # Filtro de Tipo de Medalha
         html.Div([
-            dcc.Graph(id='area-chart', figure=create_area_fig()) # Figura inicial
-        ], style={'width': '49%', 'display': 'inline-block', 'verticalAlign': 'top', 'paddingRight': '1%'}),
+            html.Label('Selecione o Tipo de Medalha:'),
+            dcc.Dropdown(
+                id='medal-type-dropdown',
+                options=[
+                    {'label': 'Todas', 'value': 'Todas'},
+                    {'label': 'Ouro', 'value': 'Gold'},
+                    {'label': 'Prata', 'value': 'Silver'},
+                    {'label': 'Bronze', 'value': 'Bronze'}
+                ],
+                value='Todas', # Valor padrão
+                clearable=False # Impede que o usuário desmarque tudo
+            )
+        ], style={'flex': 1, 'marginRight': '10px'}), # Este filtro ficará à esquerda no container flex
 
+        # Filtro de Ano Olímpico
         html.Div([
-            html.Label('Selecione o Ano Olímpico (País Sede):'),
+            html.Label('Selecione o Ano Olímpico:'),
             dcc.Dropdown(
                 id='year-dropdown',
-                options=year_options_for_dropdown,
-                value=default_year, # Padrão para o ano mais recente
-                clearable=False,
-                style={'marginBottom': '10px'}
-            ),
-            dcc.Graph(id='bar-chart', figure=create_bar_fig(year=default_year)) # Figura inicial
-        ], style={'width': '49%', 'display': 'inline-block', 'verticalAlign': 'top', 'paddingLeft': '1%'})
+                options=[{'label': year, 'value': year} for year in sorted(df_yearly_country['Year'].unique())], # Opções ordenadas
+                value=df_yearly_country['Year'].min(), # Valor padrão (primeiro ano)
+                clearable=False # Impede que o usuário desmarque tudo
+            )
+        ], style={'flex': 1, 'marginLeft': '10px'}), # Este filtro ficará à direita no container flex
 
-    ], style={'display': 'flex', 'marginBottom': '30px'}),
+    ], style={'display': 'flex', 'marginBottom': '20px'}), # display: flex para os filtros ficarem lado a lado
 
+    # Container para Filtro de País e Gráfico de Pizza
+    # Mantemos este separado pois o filtro de país só afeta o gráfico de pizza
     html.Div([
-        html.H3("Detalhes de Medalhas por País", style={'textAlign': 'center', 'marginTop': '20px'}),
-        html.Label('Selecione o País:', style={'marginRight': '10px'}),
+        html.Label('Selecione o País (para o Gráfico de Pizza):'), # Rótulo mais claro
         dcc.Dropdown(
             id='country-dropdown',
-            options=[{'label': country, 'value': country} for country in sorted(df['Country_Name'].unique())],
-            value='Estados Unidos da América', # Padrão
-            clearable=False,
-            style={'width': '300px', 'display': 'inline-block', 'marginBottom': '10px'}
+            options=[{'label': country, 'value': country} for country in sorted(df['Country_Name'].unique())], # Opções ordenadas
+            value='Estados Unidos da América' # Valor padrão
         ),
-        dcc.Graph(id='pie-chart', figure=create_pie_chart('Estados Unidos da América')) # Figura inicial
-    ], style={'width': '70%', 'margin': 'auto', 'textAlign': 'center', 'padding': '20px', 'border': '1px solid #eee', 'borderRadius': '5px'})
+        dcc.Graph(id='pie-chart')
+    ], style={'marginTop': '20px'}) # Adiciona um pouco de espaço acima desta seção
 ])
 
 
 # Callbacks para atualizar os gráficos
+# Callback para o Mapa (depende apenas do filtro de tipo de medalha)
 @app.callback(
     Output('map', 'figure'),
     [Input('medal-type-dropdown', 'value')]
@@ -200,24 +184,27 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif'}, children=[
 def update_map(medal_type):
     return create_map_fig(medal_type)
 
-
+# Callback para o Gráfico de Área (depende apenas do filtro de tipo de medalha)
 @app.callback(
     Output('area-chart', 'figure'),
     [Input('medal-type-dropdown', 'value')]
 )
 def update_area_chart(medal_type):
+    # A função create_area_fig já lida com o tipo de medalha
     return create_area_fig(medal_type)
 
-
+# Callback para o Gráfico de Barras (depende do filtro de ano e do filtro de tipo de medalha)
 @app.callback(
     Output('bar-chart', 'figure'),
     [Input('year-dropdown', 'value'),
-     Input('medal-type-dropdown', 'value')]
+     Input('medal-type-dropdown', 'value')] # Adicionado Input para o filtro de tipo de medalha
 )
 def update_bar_chart(year, medal_type):
+    # A função create_bar_fig já lida com o ano e o tipo de medalha
     return create_bar_fig(year, medal_type)
 
 
+# Callback para o Gráfico de Pizza (depende apenas do filtro de país)
 @app.callback(
     Output('pie-chart', 'figure'),
     [Input('country-dropdown', 'value')]
