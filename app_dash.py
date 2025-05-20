@@ -16,14 +16,14 @@ def load_data():
     """
     try:
         # Carregar arquivos de cadastro
-        df_produtos = pd.read_csv('Cadastro Produtos.csv', encoding='utf-8')
-        df_lojas = pd.read_csv('Cadastro Lojas.csv', encoding='utf-8')
-        df_clientes = pd.read_csv('Cadastro Clientes.csv', encoding='utf-8')
+        df_produtos = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Produtos.csv', encoding='utf-8')
+        df_lojas = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Lojas.csv', encoding='utf-8')
+        df_clientes = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Clientes.csv', encoding='utf-8')
 
         # Carregar arquivos de vendas
-        df_vendas_2020 = pd.read_csv('Base Vendas - 2020.csv', encoding='utf-8')
-        df_vendas_2021 = pd.read_csv('Base Vendas - 2021.csv', encoding='utf-8')
-        df_vendas_2022 = pd.read_csv('Base Vendas - 2022.csv', encoding='utf-8')
+        df_vendas_2020 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202020.csv', encoding='utf-8')
+        df_vendas_2021 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202021.csv', encoding='utf-8')
+        df_vendas_2022 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202022.csv', encoding='utf-8')
     except FileNotFoundError as e:
         print(f"Erro: Arquivo não encontrado. Verifique se os CSVs estão no diretório correto. Detalhe: {e}")
         return pd.DataFrame() # Retorna DataFrame vazio em caso de erro
