@@ -1,210 +1,367 @@
-import pandas as pd
-import plotly.express as px
 import dash
-from dash import dcc
-from dash import html
-from dash.dependencies import Input, Output
+from dash import dcc, html, dash_table
+from dash.dependencies import Input, Output, State
+import plotly.express as px
+import pandas as pd
+import numpy as np
 
-# Carregar o arquivo CSV
-df = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Summer_olympic_Medals.csv')
+# Constantes para filtros "Todos"
+ALL_VALUES = "TODOS"
 
-# Filtrar os dados entre 1992 e 2020
-df = df[(df['Year'] >= 1992) & (df['Year'] <= 2020)].copy() # Usar .copy() para evitar SettingWithCopyWarning
+# Carregamento e pré-processamento dos dados
+def load_data():
+    """
+    Carrega todos os arquivos CSV, unifica os dados de vendas,
+    clientes e realiza os merges necessários.
+    """
+    try:
+        # Carregar arquivos de cadastro
+        df_produtos = pd.read_csv('Cadastro Produtos.csv', encoding='utf-8')
+        df_lojas = pd.read_csv('Cadastro Lojas.csv', encoding='utf-8')
+        df_clientes = pd.read_csv('Cadastro Clientes.csv', encoding='utf-8')
 
-# Calcular o total de medalhas para cada país por ano
-# Agrupar por país e ano antes de calcular o total para ter dados anuais
-df_yearly_country = df.groupby(['Country_Name', 'Year'])[['Gold', 'Silver', 'Bronze']].sum().reset_index()
-df_yearly_country['Total_Medals'] = df_yearly_country['Gold'] + df_yearly_country['Silver'] + df_yearly_country['Bronze']
+        # Carregar arquivos de vendas
+        df_vendas_2020 = pd.read_csv('Base Vendas - 2020.csv', encoding='utf-8')
+        df_vendas_2021 = pd.read_csv('Base Vendas - 2021.csv', encoding='utf-8')
+        df_vendas_2022 = pd.read_csv('Base Vendas - 2022.csv', encoding='utf-8')
+    except FileNotFoundError as e:
+        print(f"Erro: Arquivo não encontrado. Verifique se os CSVs estão no diretório correto. Detalhe: {e}")
+        return pd.DataFrame() # Retorna DataFrame vazio em caso de erro
 
+    # Unificar colunas Nome e Sobrenome em Clientes
+    df_clientes['Nome Completo'] = df_clientes['Primeiro Nome'] + ' ' + df_clientes['Sobrenome']
 
-# Funções para gerar os gráficos
-def create_map_fig(medal_type='Todas'):
-    # Agrupar dados por país, somando as medalhas para o período completo
-    if medal_type == 'Todas':
-        df_country_medals = df_yearly_country.groupby('Country_Name')['Total_Medals'].sum().reset_index()
-        color_col = 'Total_Medals'
-        title_medal_text = 'Total de Medalhas'
-    else:
-        df_country_medals = df_yearly_country.groupby('Country_Name')[medal_type].sum().reset_index()
-        color_col = medal_type
-        title_medal_text = medal_type # Será Gold, Silver ou Bronze
+    # Unificar tabelas de vendas
+    df_vendas_total = pd.concat([df_vendas_2020, df_vendas_2021, df_vendas_2022], ignore_index=True)
 
-    map_fig = px.choropleth(df_country_medals,
-                            locations='Country_Name',
-                            locationmode='country names',
-                            color=color_col,
-                            hover_name='Country_Name',
-                            color_continuous_scale=px.colors.sequential.YlOrRd,
-                            title=f'{title_medal_text} de 1992 a 2020')
-    map_fig.update_layout(title_x=0.5) # Centralizar o título
-    return map_fig
-
-
-def create_area_fig(medal_type='Todas'):
-    top_countries = df_yearly_country.groupby('Country_Name')['Total_Medals'].sum().nlargest(10).index
-
-    # Filtrar os dados anuais apenas para os top 10 países
-    df_top_10_countries_yearly = df_yearly_country[df_yearly_country['Country_Name'].isin(top_countries)]
-
-    # Definir qual coluna usar para o eixo Y e o título
-    y_col = 'Total_Medals' if medal_type == 'Todas' else medal_type
-    title_medal_text = 'Total de Medalhas' if medal_type == 'Todas' else medal_type # Será Gold, Silver ou Bronze
-
-    area_fig = px.area(df_top_10_countries_yearly,
-                       x="Year",
-                       y=y_col,
-                       color="Country_Name",
-                       title=f'Top 10 Países por {title_medal_text} de 1992 a 2020')
-    area_fig.update_layout(title_x=0.5) # Centralizar o título
-    return area_fig
+    # Converter 'Data da Venda' para datetime e extrair Ano e Mês-Ano
+    df_vendas_total['Data da Venda'] = pd.to_datetime(df_vendas_total['Data da Venda'], dayfirst=True, errors='coerce')
+    df_vendas_total['Ano da Venda'] = df_vendas_total['Data da Venda'].dt.year
+    df_vendas_total['MesAno da Venda'] = df_vendas_total['Data da Venda'].dt.to_period('M').astype(str)
 
 
-def create_bar_fig(year=None, medal_type='Todas'):
-    # Filtrar dados pelo ano selecionado, se houver.
-    filtered_df = df_yearly_country[df_yearly_country['Year'] == year] if year else df_yearly_country
+    # Merge das tabelas
+    # Vendas com Clientes
+    df_merged = pd.merge(df_vendas_total, df_clientes, on='ID Cliente', how='left')
+    # Vendas com Produtos
+    df_merged = pd.merge(df_merged, df_produtos, on='SKU', how='left')
+    # Vendas com Lojas
+    df_merged = pd.merge(df_merged, df_lojas, on='ID Loja', how='left')
 
-    # Definir qual coluna usar para o eixo Y e para a seleção dos top 10
-    y_col = 'Total_Medals' if medal_type == 'Todas' else medal_type
-    title_medal_text = 'Total de Medalhas' if medal_type == 'Todas' else medal_type # Será Gold, Silver ou Bronze
+    # Tratar possíveis NAs após o merge (especialmente se houver IDs não correspondentes)
+    # Para colunas usadas em cálculos ou agrupamentos, preencher com valores neutros ou remover
+    df_merged['Preço Unitario'] = pd.to_numeric(df_merged['Preço Unitario'], errors='coerce').fillna(0)
+    df_merged['Qtd Vendida'] = pd.to_numeric(df_merged['Qtd Vendida'], errors='coerce').fillna(0)
 
-    # Agrupar por país e somar as medalhas (do tipo selecionado ou total) para o período/ano filtrado
-    df_country_medals = filtered_df.groupby('Country_Name')[y_col].sum().reset_index()
+    # Calcular Receita
+    df_merged['Receita'] = df_merged['Qtd Vendida'] * df_merged['Preço Unitario']
+    
+    # Remover linhas onde 'Data da Venda' não pôde ser convertida (se houver)
+    df_merged.dropna(subset=['Data da Venda'], inplace=True)
 
-    # Selecionar os top 10 países com base na coluna definida (y_col)
-    df_top_countries = df_country_medals.nlargest(10, y_col)
+    # Garantir que colunas categóricas usadas em filtros não tenham NaNs (substituir por string 'Desconhecido')
+    cols_to_fill_na = ['Produto', 'Nome da Loja', 'Nome Completo', 'Marca', 'Tipo do Produto']
+    for col in cols_to_fill_na:
+        if col in df_merged.columns:
+            df_merged[col] = df_merged[col].fillna('Desconhecido')
+        else:
+            print(f"Aviso: Coluna {col} não encontrada no DataFrame final após merges.")
+    return df_merged
 
-    # Definir o título do gráfico
-    title_year_text = f"em {year}" if year else "de 1992 a 2020"
-    title_text = f'Top 10 Países com Mais {title_medal_text} {title_year_text}'
+# Carregar os dados globalmente para serem usados nas callbacks
+df_global = load_data()
 
-    # Definir a cor da barra (opcionalmente, pode ser baseado no tipo de medalha)
-    bar_color = 'gold' if medal_type == 'Gold' else ('silver' if medal_type == 'Silver' else ('#cd7f32' if medal_type == 'Bronze' else px.colors.qualitative.Plotly[0])) # #cd7f32 é um tom de bronze
+# Inicializar o aplicativo Dash
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server # Para implantação no Render
 
-    bar_fig = px.bar(df_top_countries,
-                     x='Country_Name',
-                     y=y_col,
-                     color_discrete_sequence=[bar_color],
-                     title=title_text)
-    bar_fig.update_layout(title_x=0.5) # Centralizar o título
-    return bar_fig
-
-
-def create_pie_chart(country):
-    # Filtrar dados para o país selecionado para o período completo
-    filtered_df = df_yearly_country[df_yearly_country['Country_Name'] == country]
-    # Somar as medalhas por tipo para o país selecionado
-    medal_counts = filtered_df[['Gold', 'Silver', 'Bronze']].sum()
-
-    fig = px.pie(
-        values=medal_counts.values,
-        names=medal_counts.index,
-        title=f'Distribuição de Medalhas para {country} (1992-2020)',
-        hole=0.3,
-        labels={'Gold': 'Ouro', 'Silver': 'Prata', 'Bronze': 'Bronze'}
-    )
-    fig.update_layout(title_x=0.5) # Centralizar o título
-    return fig
+# Helper function to generate dropdown options
+def get_dropdown_options(df, column_name, add_all_values_option=True):
+    """
+    Generates a list of options for a dcc.Dropdown.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame to get unique values from.
+        column_name (str): The name of the column.
+        add_all_values_option (bool): Whether to add an 'ALL_VALUES' option at the beginning.
+        
+    Returns:
+        list: A list of dictionaries formatted for dcc.Dropdown options.
+    """
+    options = []
+    if add_all_values_option:
+        options.append({'label': ALL_VALUES, 'value': ALL_VALUES})
+    
+    if not df.empty and column_name in df.columns:
+        unique_values = sorted(df[column_name].dropna().unique())
+        options.extend([{'label': str(i), 'value': str(i)} for i in unique_values])
+    return options
 
 
-# Criar um aplicativo Dash
-app = dash.Dash(__name__)
-server = app.server 
+# --- Layout do Dashboard ---
+app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px'}, children=[
+    html.H1("Dashboard de Vendas Interativo", style={'textAlign': 'center', 'color': '#007BFF', 'marginBottom': '30px'}),
 
-# Layout do aplicativo
-app.layout = html.Div([
-    html.H1("Dashboard de Medalhas Olímpicas de Verão (1992-2020)", style={'textAlign': 'center'}),
+    # --- Seção de Filtros Globais ---
+    html.Div(className="global-filters-container", style={'marginBottom': '40px', 'padding': '20px', 'border': '1px solid #ddd', 'borderRadius': '8px', 'backgroundColor': '#f9f9f9'}, children=[
+        html.H3("Filtros Globais", style={'marginTop': '0', 'marginBottom': '20px', 'color': '#333'}),
+        html.Div(className="filters-row", style={'display': 'flex', 'flexWrap': 'wrap', 'gap': '20px'}, children=[
+            html.Div(style={'flex': '1 1 180px'}, children=[
+                html.Label("Produto:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-produto',
+                    options=get_dropdown_options(df_global, 'Produto'),
+                    value=ALL_VALUES,
+                    multi=True, 
+                    placeholder="Selecione Produtos"
+                )
+            ]),
+            html.Div(style={'flex': '1 1 180px'}, children=[
+                html.Label("Loja:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-loja',
+                    options=get_dropdown_options(df_global, 'Nome da Loja'),
+                    value=ALL_VALUES,
+                    multi=True,
+                    placeholder="Selecione Lojas"
+                )
+            ]),
+            html.Div(style={'flex': '1 1 180px'}, children=[
+                html.Label("Cliente:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-cliente',
+                    options=get_dropdown_options(df_global, 'Nome Completo'),
+                    value=ALL_VALUES,
+                    multi=True,
+                    placeholder="Selecione Clientes"
+                )
+            ]),
+            html.Div(style={'flex': '1 1 180px'}, children=[
+                html.Label("Marca do Produto:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-marca',
+                    options=get_dropdown_options(df_global, 'Marca'),
+                    value=ALL_VALUES,
+                    multi=True,
+                    placeholder="Selecione Marcas"
+                )
+            ]),
+            html.Div(style={'flex': '1 1 180px'}, children=[
+                html.Label("Tipo do Produto:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-tipo-produto',
+                    options=get_dropdown_options(df_global, 'Tipo do Produto'),
+                    value=ALL_VALUES,
+                    multi=True,
+                    placeholder="Selecione Tipos"
+                )
+            ]),
+        ])
+    ]),
 
-    # Gráfico de Mapa
-    dcc.Graph(figure=create_map_fig(), id='map', style={'height': '60vh', 'width': '100%', 'marginBottom': '20px'}), # Aumentei a altura e adicionei margem
-
-    # Container para Gráficos de Área e Barras (usando flexbox para alinhamento lado a lado)
-    html.Div([
-        dcc.Graph(figure=create_area_fig(), id='area-chart', style={'flex': 1, 'marginRight': '10px'}), # flex: 1 faz os gráficos ocuparem espaço igual
-        dcc.Graph(figure=create_bar_fig(), id='bar-chart', style={'flex': 1, 'marginLeft': '10px'})
-    ], style={'display': 'flex', 'marginBottom': '20px'}), # display: flex coloca os itens em linha
-
-    # Container para Filtros (usando flexbox para alinhamento lado a lado)
-    # Colocamos os filtros abaixo dos gráficos de área/barra, no mesmo nível para alinhá-los.
-    html.Div([
-        # Filtro de Tipo de Medalha
-        html.Div([
-            html.Label('Selecione o Tipo de Medalha:'),
-            dcc.Dropdown(
-                id='medal-type-dropdown',
-                options=[
-                    {'label': 'Todas', 'value': 'Todas'},
-                    {'label': 'Ouro', 'value': 'Gold'},
-                    {'label': 'Prata', 'value': 'Silver'},
-                    {'label': 'Bronze', 'value': 'Bronze'}
-                ],
-                value='Todas', # Valor padrão
-                clearable=False # Impede que o usuário desmarque tudo
+    # --- Seção dos 6 Gráficos Principais ---
+    html.Div(className="charts-grid", style={'display': 'grid', 'gridTemplateColumns': 'repeat(auto-fit, minmax(400px, 1fr))', 'gap': '20px'}, children=[
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Receita Total por Ano", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-receita-ano')
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Top 10 Clientes por Receita", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-top-clientes')
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Top 10 Produtos por Receita", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-top-produtos')
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Distribuição de Receita por Loja", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-receita-loja')
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Receita por Tipo de Produto (Mensal)", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-receita-tipo-produto-tempo')
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+            html.H4("Resumo de Vendas por Marca", style={'textAlign': 'center'}),
+            dash_table.DataTable(
+                id='table-vendas-marca',
+                columns=[], 
+                data=[],    
+                style_table={'overflowX': 'auto', 'height': '300px', 'overflowY': 'auto'},
+                style_cell={'textAlign': 'left', 'padding': '5px', 'minWidth': '100px', 'width': '150px', 'maxWidth': '200px'},
+                style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
+                page_size=10,
             )
-        ], style={'flex': 1, 'marginRight': '10px'}), # Este filtro ficará à esquerda no container flex
+        ]),
+    ]),
 
-        # Filtro de Ano Olímpico
-        html.Div([
-            html.Label('Selecione o Ano Olímpico:'),
-            dcc.Dropdown(
-                id='year-dropdown',
-                options=[{'label': year, 'value': year} for year in sorted(df_yearly_country['Year'].unique())], # Opções ordenadas
-                value=df_yearly_country['Year'].min(), # Valor padrão (primeiro ano)
-                clearable=False # Impede que o usuário desmarque tudo
-            )
-        ], style={'flex': 1, 'marginLeft': '10px'}), # Este filtro ficará à direita no container flex
-
-    ], style={'display': 'flex', 'marginBottom': '20px'}), # display: flex para os filtros ficarem lado a lado
-
-    # Container para Filtro de País e Gráfico de Pizza
-    # Mantemos este separado pois o filtro de país só afeta o gráfico de pizza
-    html.Div([
-        html.Label('Selecione o País (para o Gráfico de Pizza):'), # Rótulo mais claro
-        dcc.Dropdown(
-            id='country-dropdown',
-            options=[{'label': country, 'value': country} for country in sorted(df['Country_Name'].unique())], # Opções ordenadas
-            value='Estados Unidos da América' # Valor padrão
-        ),
-        dcc.Graph(id='pie-chart')
-    ], style={'marginTop': '20px'}) # Adiciona um pouco de espaço acima desta seção
+    # --- Seção do Filtro Cascata e Gráfico Associado ---
+    html.Div(className="cascading-filter-section", style={'marginTop': '40px', 'padding': '20px', 'border': '1px solid #ddd', 'borderRadius': '8px', 'backgroundColor': '#f9f9f9'}, children=[
+        html.H3("Análise Detalhada por Tipo e Marca de Produto", style={'marginTop': '0', 'marginBottom': '20px', 'color': '#333'}),
+        html.Div(className="filters-row", style={'display': 'flex', 'gap': '20px', 'marginBottom': '20px'}, children=[
+            html.Div(style={'flex': '1'}, children=[
+                html.Label("Selecione o Tipo do Produto:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-cascata-tipo-produto',
+                    options=get_dropdown_options(df_global, 'Tipo do Produto', add_all_values_option=False), # No 'ALL' option here
+                    placeholder="Selecione um Tipo"
+                )
+            ]),
+            html.Div(style={'flex': '1'}, children=[
+                html.Label("Selecione a Marca:", style={'fontWeight': 'bold', 'display': 'block', 'marginBottom': '5px'}),
+                dcc.Dropdown(
+                    id='dropdown-cascata-marca',
+                    placeholder="Selecione uma Marca (após Tipo)"
+                )
+            ]),
+        ]),
+        html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
+             html.H4("Receita por Produto (Filtrado por Tipo e Marca)", style={'textAlign': 'center'}),
+            dcc.Graph(id='graph-cascata-resultado')
+        ])
+    ]),
+    html.Footer("Dashboard desenvolvido com Dash e Plotly", style={'textAlign': 'center', 'marginTop': '40px', 'padding': '20px', 'fontSize': '0.9em', 'color': '#777'})
 ])
 
+# --- Callbacks ---
 
-# Callbacks para atualizar os gráficos
-# Callback para o Mapa 
+def apply_filters(df, selected_produtos, selected_lojas, selected_clientes, selected_marcas, selected_tipos_produto):
+    """Aplica os filtros globais ao DataFrame."""
+    dff = df.copy()
+    # Ensure selections are lists, even if single value or None is passed initially by multi-select dropdowns
+    if selected_produtos and not (isinstance(selected_produtos, list) and ALL_VALUES in selected_produtos) and ALL_VALUES not in selected_produtos:
+         if not isinstance(selected_produtos, list): selected_produtos = [selected_produtos]
+         dff = dff[dff['Produto'].isin(selected_produtos)]
+    
+    if selected_lojas and not (isinstance(selected_lojas, list) and ALL_VALUES in selected_lojas) and ALL_VALUES not in selected_lojas:
+        if not isinstance(selected_lojas, list): selected_lojas = [selected_lojas]
+        dff = dff[dff['Nome da Loja'].isin(selected_lojas)]
+
+    if selected_clientes and not (isinstance(selected_clientes, list) and ALL_VALUES in selected_clientes) and ALL_VALUES not in selected_clientes:
+        if not isinstance(selected_clientes, list): selected_clientes = [selected_clientes]
+        dff = dff[dff['Nome Completo'].isin(selected_clientes)]
+
+    if selected_marcas and not (isinstance(selected_marcas, list) and ALL_VALUES in selected_marcas) and ALL_VALUES not in selected_marcas:
+        if not isinstance(selected_marcas, list): selected_marcas = [selected_marcas]
+        dff = dff[dff['Marca'].isin(selected_marcas)]
+
+    if selected_tipos_produto and not (isinstance(selected_tipos_produto, list) and ALL_VALUES in selected_tipos_produto) and ALL_VALUES not in selected_tipos_produto:
+        if not isinstance(selected_tipos_produto, list): selected_tipos_produto = [selected_tipos_produto]
+        dff = dff[dff['Tipo do Produto'].isin(selected_tipos_produto)]
+    return dff
+
 @app.callback(
-    Output('map', 'figure'),
-    [Input('medal-type-dropdown', 'value')]
+    [Output('graph-receita-ano', 'figure'),
+     Output('graph-top-clientes', 'figure'),
+     Output('graph-top-produtos', 'figure'),
+     Output('graph-receita-loja', 'figure'),
+     Output('graph-receita-tipo-produto-tempo', 'figure'),
+     Output('table-vendas-marca', 'data'),
+     Output('table-vendas-marca', 'columns')],
+    [Input('dropdown-produto', 'value'),
+     Input('dropdown-loja', 'value'),
+     Input('dropdown-cliente', 'value'),
+     Input('dropdown-marca', 'value'),
+     Input('dropdown-tipo-produto', 'value')]
 )
-def update_map(medal_type):
-    return create_map_fig(medal_type)
+def update_main_graphs(selected_produtos, selected_lojas, selected_clientes, selected_marcas, selected_tipos_produto):
+    if df_global.empty: 
+        empty_fig = {'data': [], 'layout': {'title': 'Dados não disponíveis'}}
+        return empty_fig, empty_fig, empty_fig, empty_fig, empty_fig, [], []
+    
+    dff = apply_filters(df_global, selected_produtos, selected_lojas, selected_clientes, selected_marcas, selected_tipos_produto)
 
-# Callback para o Gráfico de Área
+    if dff.empty: 
+        empty_fig = {'data': [], 'layout': {'title': 'Nenhum dado para os filtros selecionados'}}
+        return empty_fig, empty_fig, empty_fig, empty_fig, empty_fig, [], []
+
+    # Gráfico 1: Receita Total por Ano
+    receita_ano_df = dff.groupby('Ano da Venda')['Receita'].sum().reset_index()
+    fig_receita_ano = px.line(receita_ano_df, x='Ano da Venda', y='Receita', markers=True,
+                              labels={'Ano da Venda': 'Ano', 'Receita': 'Receita Total (R$)'})
+    fig_receita_ano.update_layout(xaxis_type='category') 
+
+    # Gráfico 2: Top 10 Clientes por Receita
+    top_clientes_df = dff.groupby('Nome Completo')['Receita'].sum().nlargest(10).reset_index()
+    fig_top_clientes = px.bar(top_clientes_df, y='Nome Completo', x='Receita', orientation='h',
+                              labels={'Nome Completo': 'Cliente', 'Receita': 'Receita Total (R$)'})
+    fig_top_clientes.update_layout(yaxis={'categoryorder':'total ascending'})
+
+    # Gráfico 3: Top 10 Produtos por Receita
+    top_produtos_df = dff.groupby('Produto')['Receita'].sum().nlargest(10).reset_index()
+    fig_top_produtos = px.bar(top_produtos_df, x='Produto', y='Receita',
+                               labels={'Produto': 'Produto', 'Receita': 'Receita Total (R$)'})
+    fig_top_produtos.update_layout(xaxis={'categoryorder':'total descending'})
+
+    # Gráfico 4: Distribuição de Receita por Loja
+    receita_loja_df = dff.groupby('Nome da Loja')['Receita'].sum().reset_index()
+    fig_receita_loja = px.pie(receita_loja_df, names='Nome da Loja', values='Receita', hole=0.3)
+
+    # Gráfico 5: Receita por Tipo de Produto ao Longo do Tempo (Mensal)
+    receita_tipo_tempo_df = dff.groupby(['MesAno da Venda', 'Tipo do Produto'])['Receita'].sum().reset_index()
+    receita_tipo_tempo_df = receita_tipo_tempo_df.sort_values('MesAno da Venda')
+    fig_receita_tipo_tempo = px.area(receita_tipo_tempo_df, x='MesAno da Venda', y='Receita', color='Tipo do Produto',
+                                     labels={'MesAno da Venda': 'Mês-Ano', 'Receita': 'Receita (R$)', 'Tipo do Produto': 'Tipo de Produto'})
+    fig_receita_tipo_tempo.update_xaxes(tickangle=45)
+
+    # Tabela 6: Resumo de Vendas por Marca
+    vendas_marca_df = dff.groupby('Marca').agg(
+        Total_Qtd_Vendida=('Qtd Vendida', 'sum'),
+        Total_Receita=('Receita', 'sum')
+    ).reset_index()
+    vendas_marca_df.rename(columns={'Marca': 'Marca', 
+                                    'Total_Qtd_Vendida': 'Quantidade Vendida Total', 
+                                    'Total_Receita': 'Receita Total (R$)'}, inplace=True)
+    
+    table_cols = [{"name": i, "id": i} for i in vendas_marca_df.columns]
+    table_data = vendas_marca_df.to_dict('records')
+
+    return fig_receita_ano, fig_top_clientes, fig_top_produtos, fig_receita_loja, fig_receita_tipo_tempo, table_data, table_cols
+
 @app.callback(
-    Output('area-chart', 'figure'),
-    [Input('medal-type-dropdown', 'value')]
+    Output('dropdown-cascata-marca', 'options'),
+    [Input('dropdown-cascata-tipo-produto', 'value')]
 )
-def update_area_chart(medal_type):
-    return create_area_fig(medal_type)
+def update_marcas_dropdown(selected_tipo_produto):
+    if not selected_tipo_produto or df_global.empty:
+        return []
+    
+    # Filter df_global for the selected 'Tipo do Produto' first
+    marcas_df = df_global[df_global['Tipo do Produto'] == selected_tipo_produto]
+    
+    # Then get unique 'Marca' values from this filtered DataFrame
+    options = get_dropdown_options(marcas_df, 'Marca', add_all_values_option=False) # No 'ALL' for this one
+    return options
 
-# Callback para o Gráfico de Barras 
 @app.callback(
-    Output('bar-chart', 'figure'),
-    [Input('year-dropdown', 'value'),
-     Input('medal-type-dropdown', 'value')] # Adicionado Input para o filtro de tipo de medalha
+    Output('graph-cascata-resultado', 'figure'),
+    [Input('dropdown-cascata-tipo-produto', 'value'),
+     Input('dropdown-cascata-marca', 'value')]
 )
-def update_bar_chart(year, medal_type):
-    return create_bar_fig(year, medal_type)
+def update_cascata_graph(selected_tipo_produto, selected_marca):
+    if df_global.empty or not selected_tipo_produto or not selected_marca:
+        return {'data': [], 'layout': {'title': 'Selecione Tipo de Produto e Marca para ver os dados'}}
+
+    dff_cascata = df_global[
+        (df_global['Tipo do Produto'] == selected_tipo_produto) &
+        (df_global['Marca'] == selected_marca)
+    ]
+
+    if dff_cascata.empty:
+        return {'data': [], 'layout': {'title': f'Nenhum dado para {selected_tipo_produto} - {selected_marca}'}}
+
+    receita_produto_filtrado_df = dff_cascata.groupby('Produto')['Receita'].sum().reset_index().sort_values(by='Receita', ascending=False)
+    
+    fig_cascata = px.bar(receita_produto_filtrado_df, x='Produto', y='Receita',
+                         labels={'Produto': 'Produto', 'Receita': 'Receita Total (R$)'},
+                         title=f"Receita por Produto: {selected_tipo_produto} - {selected_marca}")
+    fig_cascata.update_layout(xaxis={'categoryorder':'total descending'})
+    return fig_cascata
 
 
-# Callback para o Gráfico de Pizza 
-@app.callback(
-    Output('pie-chart', 'figure'),
-    [Input('country-dropdown', 'value')]
-)
-def update_pie_chart(country):
-    return create_pie_chart(country)
-
-
-# Executar o aplicativo
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    if df_global.empty:
+        print("Não foi possível carregar os dados. O dashboard não será iniciado.")
+    else:
+        print("Dados carregados com sucesso. Iniciando o dashboard...")
+        app.run(debug=True) # Alterado de app.run_server para app.run
