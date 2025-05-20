@@ -16,14 +16,14 @@ def load_data():
     """
     try:
         # Carregar arquivos de cadastro
-        df_produtos = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Produtos.csv', encoding='utf-8')
-        df_lojas = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Lojas.csv', encoding='utf-8')
-        df_clientes = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Cadastro%20Clientes.csv', encoding='utf-8')
+        df_produtos = pd.read_csv('Cadastro Produtos.csv', encoding='utf-8')
+        df_lojas = pd.read_csv('Cadastro Lojas.csv', encoding='utf-8')
+        df_clientes = pd.read_csv('Cadastro Clientes.csv', encoding='utf-8')
 
         # Carregar arquivos de vendas
-        df_vendas_2020 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202020.csv', encoding='utf-8')
-        df_vendas_2021 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202021.csv', encoding='utf-8')
-        df_vendas_2022 = pd.read_csv('https://raw.githubusercontent.com/bryanthebem/plot_gustavo/refs/heads/main/Base%20Vendas%20-%202022.csv', encoding='utf-8')
+        df_vendas_2020 = pd.read_csv('Base Vendas - 2020.csv', encoding='utf-8')
+        df_vendas_2021 = pd.read_csv('Base Vendas - 2021.csv', encoding='utf-8')
+        df_vendas_2022 = pd.read_csv('Base Vendas - 2022.csv', encoding='utf-8')
     except FileNotFoundError as e:
         print(f"Erro: Arquivo não encontrado. Verifique se os CSVs estão no diretório correto. Detalhe: {e}")
         return pd.DataFrame() # Retorna DataFrame vazio em caso de erro
@@ -174,7 +174,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
             dcc.Graph(id='graph-top-produtos')
         ]),
         html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
-            html.H4("Distribuição de Receita por Loja", style={'textAlign': 'center'}),
+            html.H4("Top 15 Lojas por Receita", style={'textAlign': 'center'}), # Título alterado
             dcc.Graph(id='graph-receita-loja')
         ]),
         html.Div(className="chart-container", style={'border': '1px solid #eee', 'borderRadius': '8px', 'padding': '15px', 'backgroundColor': '#fff'}, children=[
@@ -293,9 +293,13 @@ def update_main_graphs(selected_produtos, selected_lojas, selected_clientes, sel
                                labels={'Produto': 'Produto', 'Receita': 'Receita Total (R$)'})
     fig_top_produtos.update_layout(xaxis={'categoryorder':'total descending'})
 
-    # Gráfico 4: Distribuição de Receita por Loja
-    receita_loja_df = dff.groupby('Nome da Loja')['Receita'].sum().reset_index()
-    fig_receita_loja = px.pie(receita_loja_df, names='Nome da Loja', values='Receita', hole=0.3)
+    # Gráfico 4: Top 15 Lojas por Receita (Alterado de Pizza para Barras Horizontais)
+    receita_loja_df = dff.groupby('Nome da Loja')['Receita'].sum().nlargest(15).reset_index()
+    fig_receita_loja = px.bar(receita_loja_df, y='Nome da Loja', x='Receita', orientation='h',
+                              labels={'Nome da Loja': 'Loja', 'Receita': 'Receita Total (R$)'},
+                              title="Top 15 Lojas por Receita")
+    fig_receita_loja.update_layout(yaxis={'categoryorder':'total ascending'})
+
 
     # Gráfico 5: Receita por Tipo de Produto ao Longo do Tempo (Mensal)
     receita_tipo_tempo_df = dff.groupby(['MesAno da Venda', 'Tipo do Produto'])['Receita'].sum().reset_index()
