@@ -1,0 +1,307 @@
+ID Loja,Nome da Loja,Quantidade Colaboradores,Tipo,id Localidade,Gerente Loja,Documento Gerente
+1,Loja Seattle No.1,17,Física,1,"Gonçalves, João",666418406
+2,Loja Seattle No.2,25,Física,1,"Pinheiro, Fernanda",782269727
+3,Loja Kennewick,26,Física,1,"Alves, Rodrigo",566476645
+4,Loja Bellevue,19,Física,1,"Costa, Raissa",598832615
+5,Loja Redmond,33,Física,1,"Monteiro, Felipe",200191505
+6,Loja Yakima,47,Física,1,"Lobo, Mariana",258070696
+7,Loja Granger,22,Física,1,"Dantas, Vinicius",137257008
+8,Loja Sunnyside,17,Física,1,"Koch, Thomaz",148283535
+9,Loja Toppenish,25,Física,1,"Guimaraes, Adrielle",757556625
+10,Loja Wapato,25,Física,1,"Sobanski, Mariana",772151648
+11,Loja Cle Elum,26,Física,1,"Machado, Livia",438015135
+13,Loja Snoqualmie,33,Física,1,"Oliva, Bruna",458643508
+14,Loja Fall City,47,Física,1,"Pallotta, Andre",293551216
+15,Loja Renton,22,Física,1,"Quintana, Victoria",150585293
+16,Loja Everett,17,Física,1,"Wancelotti, Luiz",682882258
+17,Loja Spokane,25,Física,1,"Amaro, Carolina",216921175
+18,Loja Veradale,26,Física,1,"Martins, Aline",550162476
+20,Loja Englewood,33,Física,1,"Blanquez, Mylena",622602258
+21,Loja Wheat Ridge,47,Física,1,"Santos, Audir",658086597
+22,Loja Westminster,22,Física,2,"Andrade, Lucas",398404937
+23,Loja Grand Junction,17,Física,1,"Wassem, Átila",283231970
+24,Loja New Castle,25,Física,1,"Alves, Vinicius",496323922
+25,Loja Greeley No.1,25,Física,1,"Cordeiro, Lucas",391200910
+26,Loja Loveland,26,Física,1,"Pretti, Cícero",517979422
+27,Loja Lafayette,19,Física,1,"Araújo, Juliana",958599604
+28,Loja Castle Rock,33,Física,1,"Cardozo, Vitor",383187294
+30,Loja Fort Collins,22,Física,1,"Magalhães, João",710773314
+31,Loja Greeley No.2,17,Física,1,"Quintana, Mylena",703600407
+32,Loja Milliken,25,Física,1,"Condé, José",656196435
+33,Loja Berthoud,26,Física,1,"Rodrigues, Victor",725440447
+34,Loja Denver No.1,26,Física,1,"Cotta, Lucas",192837467
+35,Loja Denver No.2,19,Física,1,"Silveira, Paulo",126592536
+36,Loja Denver No.3,33,Física,1,"Goncalves, Amanda",137497733
+37,Loja Boulder,47,Física,1,"Grippe, Jéssica",637536440
+38,Loja Thornton,22,Física,1,"Therezo, João",459664769
+39,Loja Littleton,17,Física,1,"Andrade, Patrick",820819434
+40,Loja Aurora,25,Física,1,"Porto, João",535707685
+41,Loja Parker,26,Física,1,"Rossini, Vitor",233971955
+42,Loja Green Bay,19,Física,1,"Faccin, Giuseppe",784596643
+43,Loja Appleton,33,Física,1,"Pires, Hanna",148808289
+44,Loja Menasha,47,Física,1,"Walter, João",350727716
+45,Loja Oshkosh,22,Física,1,"Ferreira, Jessica",472025954
+46,Loja Fond du Lac,17,Física,1,"Feliciano, Gil",431015240
+47,Loja Milwaukee No.1,25,Física,1,"Arruda, Jessica",632618369
+49,Loja Milwaukee No.3,26,Física,1,"Favoretto, Jessica",648342376
+50,Loja Waukesha No.1,19,Física,1,"Nohara, Lorena",749372644
+51,Loja Racine No.1,33,Física,1,"Simões, Aline",441540643
+52,Loja Burlington,47,Física,1,"Barbosa, João",442085397
+53,Loja East Troy,22,Física,1,"Lemos, Andre",248831332
+54,Loja Waukesha No.2,17,Física,1,"Oliveira, Poline",996214585
+55,Loja Germantown,25,Física,1,"Braun, Marcelo",676041953
+57,Loja Port Washington,26,Física,1,"Diniz, Alberto",213808369
+58,Loja Sheboygan,19,Física,1,"Mayer, Rodrigo",457065191
+59,Loja Manitowoc,33,Física,1,"Ribeiro, Fernanda",443194701
+60,Loja Madison,47,Física,1,"Wiener, Adelino",699395364
+61,Loja Oregon,22,Física,1,"Oliva, Roberta",274064609
+63,Loja Edgerton,25,Física,1,"Fernandes, Aline",395943763
+64,Loja Fort Atkinson,26,Física,1,"Figueira, Fernanda",533133364
+65,Loja Racine No.2,19,Física,1,"Junqueira, Roberta",922690535
+66,Loja Houston No.1,33,Física,1,"Ferreira, Marcelo",650601944
+67,Loja Houston No.2,47,Física,1,"Santana, Eduardo",580812912
+68,Loja Houston No.3,22,Física,1,"Martins, Gil",334539089
+69,Loja Houston No.4,17,Física,1,"Gonçalves, Carla",291633377
+70,Loja Midland,25,Física,1,"Resende, Roberta",815484901
+71,Loja Russellville,25,Física,1,"Junqueira, Jéssica",113671049
+72,Loja Minden,26,Física,1,"Grecco, Carolina",724498251
+73,Loja Shreveport,19,Física,1,"Mello, Juliana",674519288
+74,Loja Marshall,33,Física,1,"Fernandes , Bárbara",279794445
+75,Loja Longview,47,Física,1,"Amaral, Andre",472995633
+76,Loja Beaumont No.1,22,Física,1,"Valverde, Carolina",776364792
+77,Loja Orange,17,Física,1,"Gonçalves, Bárbara",397915178
+78,Loja Beaumont No.2,25,Física,1,"Araújo, Bárbara",495088235
+79,Loja Baytown,26,Física,1,"Gonçalves, Matheus",772206299
+80,Loja La Porte,26,Física,1,"Feliciano, Fillipe",576077763
+81,Loja Bacliff,19,Física,1,"Almeida, Daniela",686988860
+82,Loja Texas City,33,Física,1,"Costa, Luana",532507973
+83,Loja Pasadena,47,Física,1,"Vanin, Isabelle",867570901
+85,Loja Spring,17,Física,1,"Resende, Stefan",610684796
+86,Loja Austin,25,Física,1,"Ribeiro, Victor",285197952
+87,Loja San Antonio,26,Física,1,"Vazquez, Bruno",195827168
+88,Loja Cedar Park,19,Física,1,"Santos, Gabriel",809496425
+89,Loja Round Rock,33,Física,1,"Neves, Pedro",514178779
+90,Loja Dallas,47,Física,1,"Peres, Carolina",461667762
+91,Loja Georgetown,22,Física,1,"Felipe, João",774637903
+92,Loja Hillsboro,17,Física,1,"Ferreira, Patrick",481194799
+93,Loja Arlington,25,Física,1,"Battaglini, Livia",339644249
+94,Loja Grand Prairie,25,Física,1,"Bueno, Gil",210018045
+95,Loja Desoto,26,Física,1,"Figueira, Audir",642112421
+96,Loja Richardson,19,Física,1,"Granuzzi, Luiz",483669359
+97,Loja Lewisville,33,Física,1,"Gonçalves, Mylena",809793860
+98,Loja Denton,47,Física,1,"Cordeiro, Bruno",633400076
+99,Loja Fort Worth,22,Física,1,"Bettoni, Lucas",341549666
+100,Loja Plano,17,Física,1,"Soares, João",129109320
+101,Loja Miami No.1,17,Física,1,"Lemos, Adrielle",665062470
+102,Loja Miami No.2,25,Física,1,"Wiener, Luiz",123278813
+103,Loja Jacksonville,26,Física,1,"Wille, Matheus",689760739
+104,Loja Tallahassee No.1,19,Física,1,"Goncalves, Rafael",616610071
+105,Loja Tallahassee No.2,33,Física,1,"Lellis, Daniela",610522609
+107,Loja Sebring,22,Física,1,"Neto, Carolina",173308423
+108,Loja Lakeland,17,Física,1,"Moreira, Felipe",420751339
+109,Loja Fort Lauderdale,25,Física,1,"Mendes, Rodrigo",906150265
+110,Loja Orlando,25,Física,1,"Peres, Aline",765360121
+111,Loja Tampa,26,Física,1,"Borges, Fernanda",247711041
+113,Loja Cape Canaveral,33,Física,1,"Dias, Fernanda",965667424
+114,Loja Albany,47,Física,1,"Bragard, João",869021433
+115,Loja New York No.1,22,Física,1,"Grecco, Leonardo",645880466
+116,Loja Rochester No.1,17,Física,1,"Noronha, Gabriel",146422074
+117,Loja New York No.2,25,Física,1,"Schmidt, Flávio",561731073
+118,Loja Syracuse,26,Física,1,"Sberci, Rodrigo",405403135
+120,Loja Plattsburgh,33,Física,1,"Pereira, João",475046314
+121,Loja Brooklyn,47,Física,1,"Lellis, Leonardo",297881149
+122,Loja Oswego,22,Física,1,"Felipe, Fillipe",485593871
+123,Loja Ithaca,17,Física,1,"Dourado, Roberto",302242532
+124,Loja Rochester No.2,25,Física,1,"Santos, Marcelo",522461326
+125,Loja Queens,25,Física,1,"Barbosa, Isabelle",952026498
+126,Loja Elmira,26,Física,1,"Silva, Gustavo",517595382
+127,Loja Poestenkill,19,Física,1,"Gonçalves, Patrick",980680625
+128,Loja Trenton No.1,33,Física,1,"Walter, Renan",247362571
+130,Loja Newark No.1,22,Física,1,"Oliveira, Rafael",337265534
+131,Loja Newark No.2,17,Física,1,"Amaral, Amanda",680232999
+132,Loja Jersey City,25,Física,1,"Canicali, Lucas",372466625
+133,Loja Paterson,26,Física,1,"Custódio, Jessica",641555206
+134,Loja Clifton,26,Física,1,"Gonçalves, Marina",786504524
+135,Loja East Orange,19,Física,1,"Andrade, Daniela",571114764
+136,Loja Passaic,33,Física,1,"Machado, Bárbara",148151205
+137,Loja Bayonne,47,Física,1,"Mota, Matheus",574406867
+138,Loja Vineland,22,Física,1,"Mayer, Bruna",336784632
+139,Loja New Brunswick,17,Física,1,"Mello, Hanna",290113089
+140,Loja Hackensack,25,Física,1,"Macau, Lucas",353807270
+141,Loja Atlantic City,26,Física,1,"Ferreira, Livia",346798696
+142,Loja Montclair,19,Física,1,"Onishi, Patrick",137393586
+143,Loja Hoboken,33,Física,1,"Amaro, Luana",961927762
+144,Loja Morristown,47,Física,1,"Braun, Marina",254510322
+145,Loja Cape May,22,Física,1,"Sousa, Átila",887571364
+146,Loja Boston,17,Física,1,"Magalhães, Carolina",932366227
+147,Loja Worcester No.1,25,Física,1,"Lima, Adrielle",223486932
+149,Loja New Bedford,26,Física,1,"Gonçalves, Pedro",627650321
+150,Loja Attleboro,19,Física,1,"Arruda, Larissa",876032050
+151,Loja Lowell,33,Física,1,"Iwai, Matheus",937038287
+152,Loja Leominster,47,Física,1,"Cotta, Flávio",306037861
+153,Loja Hingham,22,Física,1,"Favoretto, João",803704632
+154,Loja Quincy,17,Física,1,"Silva, Leonardo",379241392
+155,Loja Framingham,25,Física,1,"Mendes, Átila",358847436
+156,Loja Cambridge,26,Física,3,"Vilela, Eduardo",70061570
+157,Loja Somerville,26,Física,1,"Pereira, Fernanda",630411291
+158,Loja Haverhill,19,Física,1,"Ifanger, Andre",126341752
+159,Loja Lynn,33,Física,1,"Nohara, Aline",344952472
+160,Loja Northampton,47,Física,1,"Peres, Pedro",945824923
+161,Loja Holyoke,22,Física,1,"Santos, Raissa",813900107
+163,Loja Falmouth,25,Física,1,"Grippe, Brenda",546842302
+164,Loja Provincetown,26,Física,1,"Lemos, José",376237087
+165,Loja Nantucket,19,Física,1,"Ling, Andre",264003477
+166,Loja Bangor,33,Física,1,"Dias, Rafael",525693146
+167,Loja Bar Harbor,47,Física,1,"Sousa, Matheus",720094732
+168,Loja Kennebunkport,22,Física,1,"Yamashita, Carla",907267425
+169,Loja Lewiston,17,Física,1,"Cardozo, Maria",986345837
+170,Loja Orono,25,Física,1,"Bueno, Roberta",467060037
+171,Loja South Portland,25,Física,1,"Capistrano, Bruna",825644232
+172,Loja Hartford,26,Física,1,"Gonçalves, Bruna",173998548
+173,Loja Bridgeport,19,Física,1,"Yamashita, Isabelle",196398360
+174,Loja Waterbury,33,Física,1,"Kuroiwa, Isabella",456413934
+175,Loja Old Saybrook,47,Física,1,"Vieira, Rafael",138379506
+176,Loja Darien,22,Física,1,"Santos, Bruna",395450339
+177,Loja New Haven,17,Física,1,"Soares, Gustavo",263712841
+178,Loja Litchfield County,25,Física,1,"Peres, Lucas",796622820
+179,Loja New London,26,Física,1,"Cintra, Douglas",589421831
+180,Loja Norfolk,26,Física,1,"Vilela, Isabella",369380564
+181,Loja Virginia Beach,19,Física,1,"Castor, Luana",306512818
+182,Loja Winchester,33,Física,1,"Grippe, Lucas",457755197
+183,Loja Anchorage,47,Física,1,"Lima, Bruno",203408476
+185,Loja Roanoke,17,Física,1,"Goncalves, Higor",188310691
+186,Loja Charlottesville,25,Física,1,"Rocha, Fernanda",601669174
+187,Loja Fredericksburg,26,Física,1,"Rossini, Thayná",906706359
+188,Loja Martinsville,19,Física,1,"Yamashita, Roberto",348508241
+189,Loja Greenville,33,Física,1,"Rossini, Victor",783213370
+190,Loja Charleston,47,Física,1,"Favoretto, Leandro",848395427
+191,Loja Annapolis,22,Física,1,"Andrade, Isabella",299075214
+192,Loja Baltimore,17,Física,1,"Capistrano, Luiz",985694474
+193,Loja Howard,25,Física,1,"Lamoglia, João",444098003
+194,Loja Ridgely,25,Física,1,"Macedo, Roberta",374562531
+195,Loja Queen Anne's County,26,Física,1,"Ferreira, Carolina",894518598
+196,Loja Parkville,19,Física,1,"Amaral, Raissa",949277479
+197,Loja Back River,33,Física,1,"Celestino, Andre",258989109
+198,Loja North Harford,47,Física,1,"Rimes, Lucas",125725480
+201,Loja London,17,Física,3,"Martins, Luca",79894784
+202,Loja Edinburgh,25,Física,3,"Gonçalves, Larissa",24501346
+203,Loja Glasgow,26,Física,3,"Santos, André",60561942
+204,Loja York,78,Física,3,"Nawa, Fernanda",19022472
+205,Loja Carlisle,23,Física,3,"Pires, Débora",25909892
+206,Loja Manchester,11,Física,3,"Bonazza, Luana",20664168
+207,Loja Lancashire,36,Física,3,"Pereira, Gabriel",86141359
+208,Loja West Yorkshire,90,Física,3,"Guimarães, Aline",87233411
+209,Loja Baildon,32,Física,3,"Bretas, Gabriel",59736745
+210,Loja Cheshire,23,Física,3,"Goncalves, Fernanda",49013455
+211,Loja Stockport,34,Física,3,"Onishi, Frederico",11800128
+212,Loja Liverpool,64,Física,3,"Vanin, Jéssica",55703788
+213,Loja Knotty Ash,24,Física,3,"Onishi, Aline",40187876
+214,Loja Leeds,25,Física,3,"Sousa, Aline",51209286
+215,Loja Paris,12,Física,4,"Soares, Adriano",83707979
+216,Loja Marseille,13,Física,4,"Silveira, Lorena",41958108
+217,Loja Lyon,15,Física,4,"Pires, Aline",28401446
+218,Loja Toulouse,23,Física,4,"Isau, Fernanda",79406455
+219,Loja Nice,32,Física,4,"Mariano, Eduardo",55804439
+220,Loja Nantes,11,Física,4,"Telles, Hanna",16642888
+221,Loja Strasbourg,10,Física,4,"Arruda, Livia",76455457
+222,Loja Roma,43,Física,5,"Magalhães, Leandro",58821163
+223,Loja Venezia,11,Física,5,"Vazquez, Thayná",19021172
+224,Loja Firenze,45,Física,5,"Wancelotti, Luiz",13417898
+225,Loja Torino,24,Física,5,"Gomide, Bárbara",71821223
+226,Loja Milan,23,Física,5,"Gonçalves, Luca",12389226
+227,Loja Naples,13,Física,1,"Minatel, Guilherme",248819362
+228,Loja Berlin,13,Física,6,"Rodrigues, João",73120635
+230,Loja koln No.2,25,Física,6,"Grippe, Giuseppe",62579514
+231,Loja Hofheim,25,Física,6,"Costa, Isabelle",18038468
+232,Loja koln No.1,35,Física,6,"Silva, Patrick",83696351
+233,Loja Landstuhl,21,Física,6,"Zolini, Gabriel",48833603
+234,Loja Dusseldorf,24,Física,6,"Zimerer, Lucas",26394472
+235,Loja Ramstein,15,Física,6,"Rasteira, Frederico",82817771
+236,Loja Baumholder,28,Física,6,"Klain, Fillipe",72356048
+237,Loja Giebelstadt,15,Física,6,"Cassettari, Felipe",16270597
+238,Loja obamberg,29,Física,6,"Moreira, Stefan",52637305
+239,Loja Munich,18,Física,6,"Favoretto, Jessica",43142456
+240,Loja Amsterdam,26,Física,7,"Santos, Giuseppe",56321814
+241,Loja Copenhagen,25,Física,8,"Santana, Rafael",61982286
+242,Loja Stockholm,33,Física,9,"Alves, Victoria",74247008
+243,Loja Madrid,35,Física,10,"Mayer, Rafael",39004245
+244,Loja Ljubljana,36,Física,11,"Silveira, João",77433755
+245,Loja Bucharest,25,Física,12,"Junqueira, Átila",71454845
+246,Loja Berne,53,Física,13,"Baldini, Bruna",32438821
+247,Loja Warsaw,15,Física,14,"Barbosa, Jéssica",32274060
+248,Loja Valletta,42,Física,15,"Azuma, Michelle",36187290
+249,Loja Dublin,55,Física,16,"Turri, Jessica",76116398
+250,Loja Athens,15,Física,17,"Bueno, Zilma",42233596
+251,Loja Singapore,27,Física,18,"Dantas, Jéssica",650334478
+252,Loja Canberra,28,Física,19,"Sousa, Adelino",43862649
+253,Loja Sydney No.1,20,Física,19,"Vieira, Adelino",32797595
+254,Loja Yerevan,15,Física,20,"Ivanaga, Marianna",774810078
+255,Loja New Delhi,29,Física,21,"Monteiro, Marcelo",183725981
+256,Loja Mumbai,35,Física,21,"Perciavalle, Maria",627846759
+257,Loja Kolkata,35,Física,21,"Sousa, André",709193971
+258,Loja Thimphu No.1,35,Física,22,"Paschoarelli, Mylena",572355419
+259,Loja Hong Kong No.1,35,Física,23,"Gaiotto, Hanna",386999248
+260,Loja Tehran No.1,35,Física,24,"Perciavalle, Marina",593618161
+261,Loja Damascus No.1,35,Física,25,"Martins, João",416343487
+262,Loja Bangkok No.1,62,Física,26,"Neves, Adriano",142234187
+263,Loja Moscow No.1,65,Física,27,"Falkenbach, Hanna",88518310
+264,Loja Ashgabat No.1,68,Física,28,"Gonçalves, Roberto",565563007
+265,Loja Islamabad No.1,71,Física,29,"Martins, Audir",433152035
+267,Loja Tokyo No.1,68,Física,30,"Santos, Amanda",130225150
+268,Loja Tokyo No.2,68,Física,30,"Moreira, Victor",232987780
+269,Loja Yokohama,77,Física,30,"Gaiotto, Felipe",365068953
+270,Loja Osaka No.1,80,Física,30,"Freitas, Carolina",988529296
+271,Loja Nagoya,50,Física,30,"Favoretto, Fernanda",764017847
+272,Loja Sapporo,50,Física,30,"Silva, Tomas",708971555
+273,Loja Kyoto,50,Física,30,"Amaro, Lorena",586281819
+274,Loja Seoul,50,Física,31,"Bretas, Livia",354370458
+275,Loja Busan,50,Física,31,"Rodrigues, Hanna",595376649
+276,Loja Bishkek,50,Física,32,"Peres, Raissa",386040813
+277,Loja Shanghai No.1,95,Física,23,"Braga, Vitor",632396771
+278,Loja Urumqi,50,Física,23,"Borges, Eduardo",250826665
+279,Loja Beijing,86,Física,23,"Vieira, Jéssica",433505294
+280,Loja Guangzhou,131,Física,23,"Guimarães, Brenda",318254527
+281,Loja Shanghai No.2,95,Física,23,"Tavares, Raissa",197228998
+282,Loja Ottawa No.1,95,Física,2,"Neto, Pedro",435474140
+283,Loja Ottawa No.2,95,Física,2,"Martins, Renan",931840511
+284,Loja Toronto No.1,95,Física,2,"Oliva, João",512590978
+285,Loja Toronto No.2,95,Física,2,"Tavares, Isabella",513880284
+286,Loja Toronto No.3,95,Física,2,"Simões, Bruno",499598996
+287,Loja Montreal No.1,95,Física,2,"Araújo, Audir",492492830
+288,Loja Montreal No.2,95,Física,2,"Martins, Jessica",543574368
+289,Loja Vancouver No.1,95,Física,2,"Minatel, Lucas",375784151
+290,Loja Vancouver No.2,95,Física,2,"Wancelotti, Leonardo",909562107
+291,Loja Calgary,95,Física,2,"Costa, Rodrigo",893455088
+292,Loja Thimphu No.2,95,Física,22,"Mayer, Fernanda",538294690
+293,Loja Hong Kong No.2,95,Física,23,"Alves, Alberto",830822258
+294,Loja Tehran No.2,95,Física,24,"Marinho, Caio",236629633
+295,Loja Damascus No.2,95,Física,25,"Isau, Carolina",143109286
+296,Loja Bangkok No.2,95,Física,26,"Accorsi, Poline",790452312
+297,Loja Moscow No.2,95,Física,27,"Falkenbach, Pedro",75204155
+298,Loja Ashgabat No.2,95,Física,28,"Rasteira, Rodrigo",252028569
+299,Loja Islamabad No.2,95,Física,29,"Rossini, Renan",204116236
+300,Loja Sydney No.2,95,Física,19,"Cunha, Leonardo",72489301
+301,Loja Osaka No.2,95,Física,30,"Onishi, Gabriel",434515094
+302,Loja Jakarta,95,Física,33,"Nawa, Átila",701312058
+303,Loja Lisbon,95,Física,34,"Aurélio, Victor",34233439
+304,Loja Saint Petersburg,95,Física,27,"Sousa, Lucas",48204922
+305,Loja Nizhny Novgorod,95,Física,27,"Bonazza, Fernanda",50980888
+12,Loja North Bend,19,Física,1,"Gonçalves, Carolina",259222640
+19,Loja Cheney,19,Física,1,"Noronha, Gabriel",487302296
+29,Loja Sedalia,47,Física,1,"Wassem, Caroline",820669403
+48,Loja Milwaukee No.2,25,Física,1,"Sousa, João",547836166
+62,Loja Stoughton,17,Física,1,"Lima, Higor",846721619
+84,Loja Humble,22,Física,1,"Ribeiro, Marcos",852707750
+112,Loja Key West,19,Física,1,"Guimarães, Luana",742881528
+119,Loja Buffalo,19,Física,1,"Vieira, Roberto",604090222
+129,Loja Trenton No.2,47,Física,1,"Martins, João",989752967
+148,Loja Worcester No.2,25,Física,1,"Coral, Isabella",893759247
+162,Loja Pittsfield,17,Física,1,"Ribeiro, Lorena",571434549
+184,Loja Alexandria,22,Física,1,"Cotta, Larissa",778863176
+199,Loja North America Online,325,Online,1,"Costa, Jéssica",777271114
+200,Loja Catalog,120,Física,1,"Barbosa, Adriano",797635524
+306,Loja Europe Online,7,Online,6,"Noronha, Lorena",18399404
+307,Loja Asia Online,8,Online,23,"Ling, Renan",941810292
+308,Loja North America Reseller,15,Física,1,"Oliveira, Marianna",626023320
+309,Loja Europe Reseller,12,Física,4,"Silva, Thaís",58240939
+310,Loja Asia Reseller,17,Física,23,"Lellis, Rodrigo",879546946
